@@ -1,3 +1,3 @@
-# Chip-8-Emulator
+# Chip-8 Emulator
 
-A simple Chip-8 Emulator written in C
+==A simple Chip-8 Emulator written in C
