@@ -20,13 +20,12 @@ void chipstart(struct chip8 *chip) {
     for (int i = 0; i < MEMORY_SIZE; i++) {
         chip->memory[i] = 0;
     }
-    
+
     for (int j = 0; j < 16; j++) {
         chip->V[j] = 0;
         chip->stacker[j] = 0;
+    }
 
-  	}
-  	
     chip->I = 0;
     chip->pc = START_POS;
     chip->sp = 0;
@@ -35,21 +34,36 @@ void chipstart(struct chip8 *chip) {
 
     // Font taken from article about chip-8
     const uint8_t font[] = {
-        0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-        0x20, 0x60, 0x20, 0x20, 0x70, // 1
-        0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-        0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-        0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-        0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-        0xF0, 0x80, 0xF0, 0x90, 0xF0, //         0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-        0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-        0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-        0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-        0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-        0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-        0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-        0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-        0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+        0xF0, 0x90, 0x90,
+        0x90, 0xF0, // 0
+        0x20, 0x60, 0x20,
+        0x20, 0x70, // 1
+        0xF0, 0x10, 0xF0,
+        0x80, 0xF0, // 2
+        0xF0, 0x10, 0xF0,
+        0x10, 0xF0, // 3
+        0x90, 0x90, 0xF0,
+        0x10, 0x10, // 4
+        0xF0, 0x80, 0xF0,
+        0x10, 0xF0, // 5
+        0xF0, 0x80, 0xF0,
+        0x90, 0xF0, //         0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+        0xF0, 0x90, 0xF0,
+        0x90, 0xF0, // 8
+        0xF0, 0x90, 0xF0,
+        0x10, 0xF0, // 9
+        0xF0, 0x90, 0xF0,
+        0x90, 0x90, // A
+        0xE0, 0x90, 0xE0,
+        0x90, 0xE0, // B
+        0xF0, 0x80, 0x80,
+        0x80, 0xF0, // C
+        0xE0, 0x90, 0x90,
+        0x90, 0xE0, // D
+        0xF0, 0x80, 0xF0,
+        0x80, 0xF0, // E
+        0xF0, 0x80, 0xF0,
+        0x80, 0x80 // F
     };
 
     // load in the font
@@ -78,7 +92,8 @@ void romopen(const char *romfile, struct chip8 *chip) {
         exit(0);
     }
     // Storing bytes into memory
-    size_t readfile = fread(&chip->memory[START_POS], 1, MEMORY_SIZE - START_POS, rom);
+    size_t readfile =
+        fread(&chip->memory[START_POS], 1, MEMORY_SIZE - START_POS, rom);
 
     if (readfile == 0) {
         printf("byte has not been read");
@@ -97,7 +112,7 @@ uint16_t popoff(struct chip8 *chip) {
         printf("I shall not pop off the map");
         return 0;
     }
-    //decrease and then pop off the stack
+    // decrease and then pop off the stack
     chip->sp--;
     uint16_t toreturn = chip->stacker[chip->sp];
     return toreturn;
@@ -106,7 +121,7 @@ uint16_t popoff(struct chip8 *chip) {
 // function to push on to the stack
 void pushon(uint16_t addon, struct chip8 *chip) {
 
-	//check if we can't push anymore on the stack
+    // check if we can't push anymore on the stack
     if (chip->sp == 16) {
         printf("I shall not push off the map");
         return;
@@ -133,275 +148,274 @@ void deopcode(struct chip8 *chip) {
     // Look at the instruction nibble
     switch ((thecode >> 12) & 0x0F) {
 
-    case 0x0:
-        if (thecode == 0x00E0) {
-            // clear the screen
-            memset(chip->displayer, 0, sizeof(chip->displayer));
-            
-        } else if (thecode == 0x00EE) {
-        	//return from subroutine 
-            uint16_t popvalue = popoff(chip);
-            chip->pc = popvalue;
-            
-        }
-        break;
+        case 0x0:
+            if (thecode == 0x00E0) {
+                // clear the screen
+                memset(chip->displayer, 0, sizeof(chip->displayer));
 
-    case 0x1:
-    	//Jump to NNN
-        chip->pc = nnnComp;
-        break;
+            } else if (thecode == 0x00EE) {
+                // return from subroutine
+                uint16_t popvalue = popoff(chip);
+                chip->pc = popvalue;
+            }
+            break;
 
-    case 0x2:
-        // Push on to the stack; jump to adress of NNN 
-        pushon(chip->pc, chip);
-        chip->pc += 2;
-        chip->pc = nnnComp;
-        break;
+        case 0x1:
+            // Jump to NNN
+            chip->pc = nnnComp;
+            break;
 
-    case 0x3:
-        //	if (Vx == NN)
-        if (chip->V[xComp] == nnComp) {
-            chip->pc += 2; // Skip the next instruction
-        }
-        break;
-
-    case 0x4:
-        // if (Vx != NN)
-        if (chip->V[xComp] != nnComp) {
+        case 0x2:
+            // Push on to the stack; jump to adress of NNN
+            pushon(chip->pc, chip);
             chip->pc += 2;
-        }
-        break;
+            chip->pc = nnnComp;
+            break;
 
-    case 0x5:
-        // if (Vx == Vy)
-        if (chip->V[xComp] == chip->V[yComp]) {
-            chip->pc += 2;
-        }
-        break;
+        case 0x3:
+            //	if (Vx == NN)
+            if (chip->V[xComp] == nnComp) {
+                chip->pc += 2; // Skip the next instruction
+            }
+            break;
 
-    case 0x6:
-        // Vx = NN
-        chip->V[xComp] = nnComp;
-        break;
+        case 0x4:
+            // if (Vx != NN)
+            if (chip->V[xComp] != nnComp) {
+                chip->pc += 2;
+            }
+            break;
 
-    case 0x7:
-        // Vx += NN
-        chip->V[xComp] += nnComp;
-        break;
+        case 0x5:
+            // if (Vx == Vy)
+            if (chip->V[xComp] == chip->V[yComp]) {
+                chip->pc += 2;
+            }
+            break;
 
-    case 0x8:
-        if (nComp == 0) {
+        case 0x6:
             // Vx = NN
-            chip->V[xComp] = chip->V[yComp];
+            chip->V[xComp] = nnComp;
             break;
 
-        } else if (nComp == 1) {
-            // Vx |= Vy
-            chip->V[xComp] |= chip->V[yComp];
+        case 0x7:
+            // Vx += NN
+            chip->V[xComp] += nnComp;
             break;
 
-        } else if (nComp == 2) {
-            // Vx &= Vy
-            chip->V[xComp] &= chip->V[yComp];
-            break;
+        case 0x8:
+            if (nComp == 0) {
+                // Vx = NN
+                chip->V[xComp] = chip->V[yComp];
+                break;
 
-        } else if (nComp == 3) {
-            // Vx ^= Vy
-            chip->V[xComp] ^= chip->V[yComp];
-            break;
-            
-        } else if (nComp == 4) {
-            // Vx += Vy ; check for overflow
-            uint16_t sumup = chip->V[xComp] + chip->V[yComp];
+            } else if (nComp == 1) {
+                // Vx |= Vy
+                chip->V[xComp] |= chip->V[yComp];
+                break;
 
-            // check for overflow
-            if (sumup > 255) {
-                chip->V[15] = 1;
-            } else {
-                chip->V[15] = 0;
-            }
-            // clear out top 8 bits,
-            chip->V[xComp] = sumup & 0xFF;
-            break;
+            } else if (nComp == 2) {
+                // Vx &= Vy
+                chip->V[xComp] &= chip->V[yComp];
+                break;
 
-        } else if (nComp == 5) {
-            // Vx -= Vy; changes the VF flag
-            if (chip->V[xComp] > chip->V[yComp]) {
-                chip->V[15] = 1;
-            } else {
-                chip->V[15] = 0;
-            }
+            } else if (nComp == 3) {
+                // Vx ^= Vy
+                chip->V[xComp] ^= chip->V[yComp];
+                break;
 
-            chip->V[xComp] -= chip->V[yComp];
-            break;
+            } else if (nComp == 4) {
+                // Vx += Vy ; check for overflow
+                uint16_t sumup = chip->V[xComp] + chip->V[yComp];
 
-        } else if (nComp == 6) {
-            // Vx >>= 1; stores the least signifact bit of VX prior to shift
+                // check for overflow
+                if (sumup > 255) {
+                    chip->V[15] = 1;
+                } else {
+                    chip->V[15] = 0;
+                }
+                // clear out top 8 bits,
+                chip->V[xComp] = sumup & 0xFF;
+                break;
 
-            chip->V[15] = chip->V[xComp] & 0x1;
+            } else if (nComp == 5) {
+                // Vx -= Vy; changes the VF flag
+                if (chip->V[xComp] > chip->V[yComp]) {
+                    chip->V[15] = 1;
+                } else {
+                    chip->V[15] = 0;
+                }
 
-            chip->V[xComp] >>= 1;
+                chip->V[xComp] -= chip->V[yComp];
+                break;
 
-            break;
+            } else if (nComp == 6) {
+                // Vx >>= 1; stores the least signifact bit of VX prior to shift
 
-        } else if (nComp == 7) {
-            // Vx = Vy - Vx; also changes the V[F] flag
-            if (chip->V[yComp] >= chip->V[xComp]) {
-                chip->V[15] = 1;
-            } else {
-                chip->V[15] = 0;
-            }
+                chip->V[15] = chip->V[xComp] & 0x1;
 
-            chip->V[xComp] = chip->V[yComp] - chip->V[xComp];
-            break;
+                chip->V[xComp] >>= 1;
 
-        } else if (nComp == 14) {
-            // Vx <<= 1
-            chip->V[15] = (chip->V[xComp] & 0x80) >> 7;
-            chip->V[xComp] <<= 1;
-            break;
-            
-        }
-        break;
-    case 0x9:
-        // if (Vx != Vy)
-        if (chip->V[xComp] != chip->V[yComp]) {
-            // Skipping instruction
-            chip->pc += 2;
-        }
-        break;
+                break;
 
-    case 0xA:
-        // I = NNN
-        chip->I = nnnComp;
-        break;
+            } else if (nComp == 7) {
+                // Vx = Vy - Vx; also changes the V[F] flag
+                if (chip->V[yComp] >= chip->V[xComp]) {
+                    chip->V[15] = 1;
+                } else {
+                    chip->V[15] = 0;
+                }
 
-    case 0xB:
-        // PC =  V0 + NNN
-        chip->pc = chip->V[0] + nnnComp;
-        break;
+                chip->V[xComp] = chip->V[yComp] - chip->V[xComp];
+                break;
 
-    case 0xC:
-        chip->V[xComp] = (rand() % 256) & nnComp;
-        break;
-
-    case 0xD: {
-        // Get the x & y position
-        uint8_t Xloc = chip->V[xComp] % 64;
-        uint8_t Yloc = chip->V[yComp] % 32;
-        chip->V[15] = 0; // The carryflag
-
-        for (uint8_t shadowrow = 0; shadowrow < nComp; shadowrow++) {
-            if (Yloc + shadowrow >= 32) {
+            } else if (nComp == 14) {
+                // Vx <<= 1
+                chip->V[15] = (chip->V[xComp] & 0x80) >> 7;
+                chip->V[xComp] <<= 1;
                 break;
             }
-            uint8_t spritefind = chip->memory[chip->I + shadowrow];
-            for (uint8_t shadowcol = 0; shadowcol < 8; shadowcol++) {
-                if (Xloc + shadowcol >= 64) {
+            break;
+        case 0x9:
+            // if (Vx != Vy)
+            if (chip->V[xComp] != chip->V[yComp]) {
+                // Skipping instruction
+                chip->pc += 2;
+            }
+            break;
+
+        case 0xA:
+            // I = NNN
+            chip->I = nnnComp;
+            break;
+
+        case 0xB:
+            // PC =  V0 + NNN
+            chip->pc = chip->V[0] + nnnComp;
+            break;
+
+        case 0xC:
+            chip->V[xComp] = (rand() % 256) & nnComp;
+            break;
+
+        case 0xD: {
+            // Get the x & y position
+            uint8_t Xloc = chip->V[xComp] % 64;
+            uint8_t Yloc = chip->V[yComp] % 32;
+            chip->V[15] = 0; // The carryflag
+
+            for (uint8_t shadowrow = 0; shadowrow < nComp; shadowrow++) {
+                if (Yloc + shadowrow >= 32) {
                     break;
                 }
-                // Check if set
-                if ((spritefind & (0x80 >> shadowcol)) != 0) {
-
-                    // find correct index for it's location in the array since it's being
-                    //represented as 1d array, but it's a 2d array
-                    uint8_t findx = Xloc + shadowcol;
-                    uint8_t findy = Yloc + shadowrow;
-                    uint16_t pinpoint = findy * 64 + findx;
-
-                    if (chip->displayer[pinpoint] == 1) {
-                        chip->V[15] = 1;
+                uint8_t spritefind = chip->memory[chip->I + shadowrow];
+                for (uint8_t shadowcol = 0; shadowcol < 8; shadowcol++) {
+                    if (Xloc + shadowcol >= 64) {
+                        break;
                     }
-                    chip->displayer[pinpoint] ^= 1;
+                    // Check if set
+                    if ((spritefind & (0x80 >> shadowcol)) != 0) {
+
+                        // find correct index for it's location in the array
+                        // since it's being
+                        // represented as 1d array, but it's a 2d array
+                        uint8_t findx = Xloc + shadowcol;
+                        uint8_t findy = Yloc + shadowrow;
+                        uint16_t pinpoint = findy * 64 + findx;
+
+                        if (chip->displayer[pinpoint] == 1) {
+                            chip->V[15] = 1;
+                        }
+                        chip->displayer[pinpoint] ^= 1;
+                    }
                 }
             }
-        }
-        break;
-    }
-    case 0xE:
-        if ((thecode & 0x00FF) == 0x9E) {
-            if (chip->keystore[chip->V[xComp]] == 1) {
-                chip->pc += 2;
-            }
             break;
-            
-        } else if ((thecode & 0x00FF) == 0xA1) {
-            if (chip->keystore[chip->V[xComp]] != 1) {
-                chip->pc += 2;
-            }
         }
-        break;
+        case 0xE:
+            if ((thecode & 0x00FF) == 0x9E) {
+                if (chip->keystore[chip->V[xComp]] == 1) {
+                    chip->pc += 2;
+                }
+                break;
 
-    case 0xF:
-        if (nnComp == 0x07) {
-        	// Vx = dtime
-            chip->V[xComp] = chip->dtime;
-            break;
-
-        } else if (nnComp == 0x0A) {
-        	//Vx =  get key
-            uint8_t check = 0;
-            for (uint8_t move = 0; move < sizeof(chip->keystore); move++) {
-                if (chip->keystore[move] == 1) {
-                    check = 54;
-                    chip->V[xComp] = move;
-                    break;
+            } else if ((thecode & 0x00FF) == 0xA1) {
+                if (chip->keystore[chip->V[xComp]] != 1) {
+                    chip->pc += 2;
                 }
             }
-            
-            // Keep waiting until a key
-            if (check == 0) {
-                chip->pc -= 2;
+            break;
+
+        case 0xF:
+            if (nnComp == 0x07) {
+                // Vx = dtime
+                chip->V[xComp] = chip->dtime;
+                break;
+
+            } else if (nnComp == 0x0A) {
+                // Vx =  get key
+                uint8_t check = 0;
+                for (uint8_t move = 0; move < sizeof(chip->keystore); move++) {
+                    if (chip->keystore[move] == 1) {
+                        check = 54;
+                        chip->V[xComp] = move;
+                        break;
+                    }
+                }
+
+                // Keep waiting until a key
+                if (check == 0) {
+                    chip->pc -= 2;
+                }
+                break;
+
+            } else if (nnComp == 0x15) {
+                // dtime = Vx
+                chip->dtime = chip->V[xComp];
+                break;
+            } else if (nnComp == 0x18) {
+                // stime = Vx
+                chip->stime = chip->V[xComp];
+                break;
+
+            } else if (nnComp == 0x1E) {
+                // I += Vx
+                chip->I += chip->V[xComp];
+                break;
+
+            } else if (nnComp == 0x29) {
+                // start of font addr + Vx * 5
+                chip->I = 0x50 + (chip->V[xComp] * 5);
+                break;
+
+            } else if (nnComp == 0x33) {
+                // BCD calcs
+                uint8_t bcdfind = chip->V[xComp];
+                chip->memory[chip->I + 2] = bcdfind % 10;
+                bcdfind /= 10;
+                chip->memory[chip->I + 1] = bcdfind % 10;
+                bcdfind /= 10;
+                chip->memory[chip->I] = bcdfind;
+
+                break;
+
+            } else if (nnComp == 0x55) {
+                // regdump
+                for (uint8_t i = 0; i <= xComp; i++) {
+                    chip->memory[chip->I + i] = chip->V[i];
+                }
+                break;
+
+            } else if (nnComp == 0x65) {
+                // regload
+                for (uint8_t i = 0; i <= xComp; i++) {
+                    chip->V[i] = chip->memory[chip->I + i];
+                }
+                break;
             }
-            break;
-            
-        } else if (nnComp == 0x15) {
-        	// dtime = Vx
-            chip->dtime = chip->V[xComp];
-            break;
-        } else if (nnComp == 0x18) {
-        	//stime = Vx
-            chip->stime = chip->V[xComp];
-            break;
 
-        } else if (nnComp == 0x1E) {
-        	// I += Vx
-            chip->I += chip->V[xComp];
+        default:
+            // The void of nothing : ( where invalid opcodes go
             break;
-
-        } else if (nnComp == 0x29) {
-        	// start of font addr + Vx * 5
-            chip->I = 0x50 + (chip->V[xComp] * 5);
-            break;
-            
-        } else if (nnComp == 0x33) {
-        	//BCD calcs
-            uint8_t bcdfind = chip->V[xComp];
-            chip->memory[chip->I + 2] = bcdfind % 10;
-            bcdfind /= 10;
-            chip->memory[chip->I + 1] = bcdfind % 10;
-            bcdfind /= 10;
-            chip->memory[chip->I] = bcdfind;
-
-            break;
-            
-        } else if (nnComp == 0x55) {
-        	//regdump
-            for (uint8_t i = 0; i <= xComp; i++) {
-                chip->memory[chip->I + i] = chip->V[i];
-            }
-            break;
-            
-        } else if (nnComp == 0x65) {
-        	//regload 
-            for (uint8_t i = 0; i <= xComp; i++) {
-                chip->V[i] = chip->memory[chip->I + i];
-            }
-            break;
-        }
-
-    default:
-    	//The void of nothing : ( where invalid opcodes go
-        break;
     }
 }
